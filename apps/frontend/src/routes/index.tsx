@@ -3,14 +3,14 @@ import { Navigate, useRoutes } from "react-router-dom";
 import { MainLayout } from "../layouts/main-layout";
 import { RouteGuard } from "./guard";
 
-const LoginPage = lazy(() => import("../pages/login-page"));
-const UsersPage = lazy(() => import("../pages/users-page"));
-const NotificationsPage = lazy(() => import("../pages/notifications-page"));
-const MembershipPage = lazy(() => import("../pages/membership-page"));
-const TextbooksPage = lazy(() => import("../pages/textbooks-page"));
-const CategoriesPage = lazy(() => import("../pages/categories-page"));
-const TicketsPage = lazy(() => import("../pages/tickets-page"));
-const ForbiddenPage = lazy(() => import("../pages/forbidden-page"));
+const LoginPage = lazy(() => import("../pages/login"));
+const UsersPage = lazy(() => import("../pages/users"));
+const NotificationsPage = lazy(() => import("../pages/notifications"));
+const MembershipPage = lazy(() => import("../pages/membership"));
+const TextbooksPage = lazy(() => import("../pages/textbooks"));
+const CategoriesPage = lazy(() => import("../pages/categories"));
+const TicketsPage = lazy(() => import("../pages/tickets"));
+const ForbiddenPage = lazy(() => import("../pages/forbidden"));
 
 export function RouterProvider() {
   return (

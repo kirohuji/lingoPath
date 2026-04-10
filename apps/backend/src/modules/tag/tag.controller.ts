@@ -1,19 +1,17 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Controller, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { TagService } from "./tag.service";
+import { BaseController } from "@/shared/base/base.controller";
+import { Tag } from "@prisma/client";
 
 @Controller("tags")
 @UseGuards(AuthGuard("jwt"))
-export class TagController {
-  constructor(private readonly service: TagService) {}
-
-  @Get()
-  list() {
-    return this.service.list();
-  }
-
-  @Post()
-  create(@Body() body: { name: string }) {
-    return this.service.create(body.name);
+export class TagController extends BaseController<
+  Tag,
+  { name: string },
+  { name?: string }
+> {
+  constructor(tagService: TagService) {
+    super(tagService);
   }
 }
