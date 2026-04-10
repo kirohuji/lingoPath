@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/infrastructure/prisma/prisma.service";
+import { PageQueryDto } from "@/shared/dto/page-query.dto";
+import { PageResultDto } from "@/shared/dto/page-result.dto";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
 
 @Injectable()
@@ -9,11 +11,22 @@ export class NotificationService {
     private readonly realtime: RealtimeGateway,
   ) {}
 
-  list(userId: string) {
-    return this.prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
+  async list(userId: string, query: PageQueryDto): Promise<PageResultDto<any>> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const skip = (page - 1) * pageSize;
+    const where = { userId };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.notification.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.notification.count({ where }),
+    ]);
+
+    return { items, total, page, pageSize };
   }
 
   unreadCount(userId: string) {

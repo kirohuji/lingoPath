@@ -1,16 +1,29 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/infrastructure/prisma/prisma.service";
+import { PageQueryDto } from "@/shared/dto/page-query.dto";
+import { PageResultDto } from "@/shared/dto/page-result.dto";
 
 @Injectable()
 export class TextbookService {
   constructor(private readonly prisma: PrismaService) {}
 
-  list(keyword?: string) {
-    return this.prisma.textbook.findMany({
-      where: keyword ? { title: { contains: keyword, mode: "insensitive" } } : undefined,
-      include: { episodes: true, tags: { include: { tag: true } } },
-      orderBy: { createdAt: "desc" },
-    });
+  async list(query: PageQueryDto, keyword?: string): Promise<PageResultDto<any>> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const skip = (page - 1) * pageSize;
+    const where = keyword ? { title: { contains: keyword, mode: "insensitive" as const } } : undefined;
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.textbook.findMany({
+        where,
+        include: { episodes: true, tags: { include: { tag: true } } },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.textbook.count({ where }),
+    ]);
+
+    return { items, total, page, pageSize };
   }
 
   create(data: { title: string; description?: string; coverUrl?: string }) {

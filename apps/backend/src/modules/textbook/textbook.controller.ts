@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { PageQueryDto } from "@/shared/dto/page-query.dto";
 import { TextbookService } from "./textbook.service";
 
 @Controller("textbooks")
@@ -8,8 +9,8 @@ export class TextbookController {
   constructor(private readonly service: TextbookService) {}
 
   @Get()
-  list(@Query("keyword") keyword?: string) {
-    return this.service.list(keyword);
+  list(@Query() query: PageQueryDto, @Query("keyword") keyword?: string) {
+    return this.service.list(query, keyword);
   }
 
   @Post()

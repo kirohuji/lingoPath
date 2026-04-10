@@ -1,27 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import { io } from "socket.io-client";
-import { Button } from "@/components/ui/button";
 import { http } from "@/modules/http";
 import { useAuthStore } from "@/stores/auth-store";
 import { PageShell } from "@/components/common/page-shell";
+import { DataTable } from "@/components/data-table";
 
 type NotificationItem = { id: string; title: string; body: string; read: boolean };
+type PageResult<T> = { items: T[]; total: number; page: number; pageSize: number };
 
 export default function NotificationsPage() {
   const token = useAuthStore((s) => s.token);
   const [items, setItems] = useState<NotificationItem[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const socketUrl = useMemo(() => import.meta.env.VITE_SOCKET_URL || "http://localhost:3000", []);
 
   const load = async () => {
     const [listRes, unreadRes] = await Promise.all([
-      http.get("/notifications"),
+      http.get<PageResult<NotificationItem>>("/notifications", { params: { page, pageSize } }),
       http.get("/notifications/unread-count"),
     ]);
-    setItems(listRes.data);
+    setItems(listRes.data.items);
+    setTotal(listRes.data.total);
     setUnreadCount(unreadRes.data);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [page, pageSize]);
   useEffect(() => {
     if (!token) return;
     const socket = io(socketUrl, { auth: { token } });
@@ -33,20 +38,31 @@ export default function NotificationsPage() {
 
   return (
     <PageShell title="通知中心" description={`未读 ${unreadCount}`}>
-      <Button size="sm" variant="outline" onClick={async () => { await http.patch("/notifications/read-all"); await load(); }}>
+      <button className="btn btn-outline btn-sm" onClick={async () => { await http.patch("/notifications/read-all"); await load(); }}>
         全部标记已读
-      </Button>
-      <div className="space-y-2">
-        {items.map((item) => (
-          <div key={item.id} className="rounded-lg border border-border bg-card p-3">
-            <div className="flex items-center justify-between">
-              <strong>{item.title}</strong>
-              <span className="text-xs text-muted-foreground">{item.read ? "已读" : "未读"}</span>
-            </div>
-            <div className="text-sm text-muted-foreground">{item.body}</div>
-          </div>
-        ))}
-      </div>
+      </button>
+      <DataTable
+        title="通知列表"
+        rows={items}
+        columns={[
+          { key: "title", header: "标题", render: (item) => item.title },
+          { key: "body", header: "内容", render: (item) => item.body },
+          { key: "read", header: "状态", render: (item) => (item.read ? "已读" : "未读") },
+          {
+            key: "action",
+            header: "操作",
+            render: (item) =>
+              item.read ? (
+                "-"
+              ) : (
+                <button className="btn btn-outline btn-xs" onClick={async () => { await http.patch(`/notifications/${item.id}/read`); await load(); }}>
+                  标记已读
+                </button>
+              ),
+          },
+        ]}
+        pagination={{ page, pageSize, total, onPageChange: setPage }}
+      />
     </PageShell>
   );
 }

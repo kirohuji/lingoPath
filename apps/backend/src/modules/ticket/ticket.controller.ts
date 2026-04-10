@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { CurrentUser } from "@/shared/decorators/current-user.decorator";
+import { PageQueryDto } from "@/shared/dto/page-query.dto";
 import { TicketService } from "./ticket.service";
 
 @Controller("tickets")
@@ -9,8 +10,8 @@ export class TicketController {
   constructor(private readonly service: TicketService) {}
 
   @Get()
-  list() {
-    return this.service.list();
+  list(@Query() query: PageQueryDto) {
+    return this.service.list(query);
   }
 
   @Post()

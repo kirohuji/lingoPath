@@ -1,15 +1,27 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/infrastructure/prisma/prisma.service";
+import { PageQueryDto } from "@/shared/dto/page-query.dto";
+import { PageResultDto } from "@/shared/dto/page-result.dto";
 
 @Injectable()
 export class TicketService {
   constructor(private readonly prisma: PrismaService) {}
 
-  list() {
-    return this.prisma.ticket.findMany({
-      include: { replies: true, logs: true },
-      orderBy: { createdAt: "desc" },
-    });
+  async list(query: PageQueryDto): Promise<PageResultDto<any>> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const skip = (page - 1) * pageSize;
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.ticket.findMany({
+        include: { replies: true, logs: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.ticket.count(),
+    ]);
+
+    return { items, total, page, pageSize };
   }
 
   async create(data: { userId: string; subject: string; content: string; priority?: string }) {

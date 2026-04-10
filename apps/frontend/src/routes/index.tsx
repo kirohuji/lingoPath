@@ -5,6 +5,8 @@ import { RouteGuard } from "./guard";
 
 const LoginPage = lazy(() => import("../pages/login"));
 const UsersPage = lazy(() => import("../pages/users"));
+const RolesPage = lazy(() => import("../pages/roles"));
+const PermissionsPage = lazy(() => import("../pages/permissions"));
 const NotificationsPage = lazy(() => import("../pages/notifications"));
 const MembershipPage = lazy(() => import("../pages/membership"));
 const TextbooksPage = lazy(() => import("../pages/textbooks"));
@@ -34,6 +36,8 @@ function RouterContent() {
       ),
       children: [
         { path: "users", element: <UsersPage /> },
+        { path: "roles", element: <RolesPage /> },
+        { path: "permissions", element: <PermissionsPage /> },
         { path: "notifications", element: <NotificationsPage /> },
         { path: "memberships", element: <MembershipPage /> },
         { path: "textbooks", element: <TextbooksPage /> },

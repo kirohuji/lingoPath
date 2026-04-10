@@ -13,7 +13,7 @@ export function PageShell({
     <section className="space-y-6">
       <header className="space-y-1">
         <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+        {description ? <p className="text-sm opacity-70">{description}</p> : null}
       </header>
       {children}
     </section>

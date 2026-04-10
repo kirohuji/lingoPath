@@ -4,60 +4,83 @@ import { useEffect, useState } from "react";
 import { http } from "@/modules/http";
 import { PageShell } from "@/components/common/page-shell";
 import { FilterBar } from "@/components/common/filter-bar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
 
 type Textbook = { id: string; title: string; description?: string; episodes: { id: string; title: string }[] };
+type PageResult<T> = { items: T[]; total: number; page: number; pageSize: number };
 
 export default function TextbooksPage() {
   const { getRootProps, getInputProps } = useDropzone();
   const [items, setItems] = useState<Textbook[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   const load = async () => {
-    const res = await http.get("/textbooks");
-    setItems(res.data);
+    const res = await http.get<PageResult<Textbook>>("/textbooks", { params: { page, pageSize } });
+    setItems(res.data.items);
+    setTotal(res.data.total);
   };
   useEffect(() => {
     void load();
-  }, []);
+  }, [page, pageSize]);
 
   return (
     <PageShell title="教材库" description="教材与分集管理">
       <div
         {...getRootProps()}
-        className="rounded-lg border border-dashed border-border bg-card p-4 text-sm text-muted-foreground"
+        className="rounded-box border border-dashed border-base-300 bg-base-100 p-4 text-sm opacity-70"
       >
         <input {...getInputProps()} />
         拖拽上传教材文件
       </div>
       <FilterBar>
-        <Input placeholder="教材标题" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <Input placeholder="教材描述" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <Button
-          size="sm"
+        <input
+          className="input input-bordered input-sm"
+          placeholder="教材标题"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          className="input input-bordered input-sm"
+          placeholder="教材描述"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <button
+          className="btn btn-primary btn-sm"
           onClick={async () => {
             await http.post("/textbooks", { title, description });
             setTitle("");
             setDescription("");
+            setPage(1);
             await load();
           }}
         >
           新增教材
-        </Button>
+        </button>
       </FilterBar>
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="card card-border bg-base-100">
+        <div className="card-body p-4">
         <ReactMarkdown>{description || "# 教材描述预览"}</ReactMarkdown>
+        </div>
       </div>
-      <DataTable title="教材列表">
-        {items.map((item) => (
-          <div key={item.id} className="text-sm">
-            {item.title} / 分集 {(item.episodes || []).map((ep) => ep.title).join(", ") || "无"}
-          </div>
-        ))}
-      </DataTable>
+      <DataTable
+        title="教材列表"
+        rows={items}
+        columns={[
+          { key: "title", header: "教材标题", render: (item) => item.title },
+          { key: "description", header: "描述", render: (item) => item.description || "-" },
+          {
+            key: "episodes",
+            header: "分集",
+            render: (item) => (item.episodes || []).map((ep) => ep.title).join(", ") || "无",
+          },
+        ]}
+        pagination={{ page, pageSize, total, onPageChange: setPage }}
+      />
     </PageShell>
   );
 }

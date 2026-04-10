@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { http } from "@/modules/http";
 import { PageShell } from "@/components/common/page-shell";
 import { FilterBar } from "@/components/common/filter-bar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/data-table";
 
 type CategoryItem = { id: string; name: string; level: number; sort: number; status: number };
@@ -24,9 +22,14 @@ export default function CategoriesPage() {
   return (
     <PageShell title="分类库" description="三级分类树管理">
       <FilterBar>
-        <Input placeholder="分类名" value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          className="input input-bordered input-sm"
+          placeholder="分类名"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <select
-          className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
+          className="select select-bordered select-sm"
           value={level}
           onChange={(e) => setLevel(Number(e.target.value))}
         >
@@ -34,8 +37,8 @@ export default function CategoriesPage() {
           <option value={2}>二级</option>
           <option value={3}>三级</option>
         </select>
-        <Button
-          size="sm"
+        <button
+          className="btn btn-primary btn-sm"
           onClick={async () => {
             await http.post("/categories", { name, level });
             setName("");
@@ -43,7 +46,7 @@ export default function CategoriesPage() {
           }}
         >
           新增分类
-        </Button>
+        </button>
       </FilterBar>
       <DataTable title="分类列表">
         {items.map((c) => (
@@ -51,16 +54,15 @@ export default function CategoriesPage() {
             <span>
               L{c.level} - {c.name}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              className="btn btn-outline btn-sm"
               onClick={async () => {
                 await http.delete(`/categories/${c.id}`);
                 await load();
               }}
             >
               删除
-            </Button>
+            </button>
           </div>
         ))}
       </DataTable>
