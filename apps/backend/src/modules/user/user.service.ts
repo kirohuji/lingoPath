@@ -1,10 +1,28 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/infrastructure/prisma/prisma.service";
 import { hash } from "bcryptjs";
+import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { extension } from "mime-types";
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async uploadAvatar(file: Express.Multer.File) {
+    const ext = extension(file.mimetype) || "bin";
+    const fileName = `${randomUUID()}.${ext}`;
+    const relativePath = `/uploads/avatars/${fileName}`;
+    const fullDir = join(process.cwd(), "uploads", "avatars");
+    const fullPath = join(fullDir, fileName);
+
+    await mkdir(fullDir, { recursive: true });
+    await writeFile(fullPath, file.buffer);
+
+    const base = process.env.ASSET_BASE_URL || `http://localhost:${process.env.PORT ? Number(process.env.PORT) : 3000}`;
+    return { url: `${base}${relativePath}` };
+  }
 
   list() {
     return this.prisma.user.findMany({

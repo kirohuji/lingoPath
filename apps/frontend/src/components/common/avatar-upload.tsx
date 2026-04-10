@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { http } from "@/modules/http";
 
 type AvatarUploadProps = {
   value?: string;
@@ -16,9 +17,18 @@ export function AvatarUpload({ value, label = "上传头像", onChange }: Avatar
       return;
     }
     setErrorText("");
-    const reader = new FileReader();
-    reader.onload = () => onChange(String(reader.result || ""));
-    reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    void http
+      .post("/users/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => {
+        onChange(String(res.data?.url || ""));
+      })
+      .catch(() => {
+        setErrorText("上传失败，请重试");
+      });
   };
 
   return (

@@ -6,6 +6,10 @@ import { LoginDto, RegisterDto } from "./dto";
 import { Inject } from "@nestjs/common";
 import { REDIS } from "@/infrastructure/cache/redis.module";
 import type { Redis } from "ioredis";
+import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { extension } from "mime-types";
 
 @Injectable()
 export class AuthService {
@@ -55,6 +59,21 @@ export class AuthService {
         },
       },
     });
+    if (user?.avatarUrl?.startsWith("data:image/")) {
+      const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(user.avatarUrl);
+      if (match) {
+        const ext = extension(match[1]) || "bin";
+        const fileName = `${randomUUID()}.${ext}`;
+        const relativePath = `/uploads/avatars/${fileName}`;
+        const fullDir = join(process.cwd(), "uploads", "avatars");
+        await mkdir(fullDir, { recursive: true });
+        await writeFile(join(fullDir, fileName), Buffer.from(match[2], "base64"));
+        const base = process.env.ASSET_BASE_URL || `http://localhost:${process.env.PORT ? Number(process.env.PORT) : 3000}`;
+        const avatarUrl = `${base}${relativePath}`;
+        await this.prisma.user.update({ where: { id: user.id }, data: { avatarUrl } });
+        user.avatarUrl = avatarUrl;
+      }
+    }
     const permissions =
       user?.roleAssignments.flatMap((a) =>
         a.role.permissions.map((rp) => rp.permission.code),
