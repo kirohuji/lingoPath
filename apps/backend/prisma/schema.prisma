@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  name            String?
+  passwordHash    String?
+  status          Int              @default(1)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  roleAssignments RoleAssignment[]
+  memberships     MembershipAccount?
+  notifications   Notification[]
+  tickets         Ticket[]
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  code        String           @unique
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  assignments RoleAssignment[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  roles     RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model RoleAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  type      String   @default("system")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MembershipAccount {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  points       Int           @default(0)
+  currentLevel String        @default("L1")
+  version      Int           @default(1)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledgers      PointsLedger[]
+}
+
+model PointsLedger {
+  id          String            @id @default(cuid())
+  accountId   String
+  changeValue Int
+  reason      String
+  bizId       String?
+  createdAt   DateTime          @default(now())
+  account     MembershipAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  parentId  String?
+  level     Int
+  name      String
+  sort      Int        @default(0)
+  status    Int        @default(1)
+  path      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  textbooks TextbookTagRelation[]
+}
+
+model Textbook {
+  id          String               @id @default(cuid())
+  title       String
+  description String?
+  coverUrl    String?
+  status      String               @default("draft")
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  episodes    TextbookEpisode[]
+  tags        TextbookTagRelation[]
+}
+
+model TextbookEpisode {
+  id          String   @id @default(cuid())
+  textbookId  String
+  title       String
+  content     String?
+  sort        Int      @default(0)
+  status      String   @default("draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  textbook    Textbook @relation(fields: [textbookId], references: [id], onDelete: Cascade)
+}
+
+model TextbookTagRelation {
+  id         String   @id @default(cuid())
+  textbookId String
+  tagId      String
+  textbook   Textbook @relation(fields: [textbookId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([textbookId, tagId])
+}
+
+model Ticket {
+  id         String       @id @default(cuid())
+  userId     String
+  subject    String
+  content    String
+  status     String       @default("open")
+  priority   String       @default("normal")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replies    TicketReply[]
+  logs       TicketLog[]
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  content   String
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model TicketLog {
+  id        String   @id @default(cuid())
+  ticketId  String
+  action    String
+  remark    String?
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}

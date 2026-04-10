@@ -1,0 +1,9 @@
+export const ERROR_CODES = {
+  AUTH_INVALID_CREDENTIALS: "AUTH_001",
+  USER_NOT_FOUND: "USER_001",
+  FILE_UPLOAD_FAILED: "FILE_001",
+  TICKET_NOT_FOUND: "TICKET_001",
+  SYSTEM_INTERNAL_ERROR: "SYSTEM_001",
+} as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

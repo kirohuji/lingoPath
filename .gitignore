@@ -1,0 +1,12 @@
+node_modules
+dist
+.turbo
+.idea
+.vscode
+.env
+.env.*
+!.env.example
+coverage
+pnpm-lock.yaml
+apps/backend/prisma/migrations
+uploads
