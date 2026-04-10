@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { PageShell } from "@/components/common/page-shell";
 import { DataTable } from "@/components/data-table";
 import { SearchFilterBar } from "@/components/common/search-filter-bar";
+import { FormDialog } from "@/components/form-dialog";
 
 type NotificationItem = { id: string; title: string; body: string; read: boolean };
 type PageResult<T> = { items: T[]; total: number; page: number; pageSize: number };
@@ -17,6 +18,8 @@ export default function NotificationsPage() {
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [confirmReadAllOpen, setConfirmReadAllOpen] = useState(false);
+  const [readTargetId, setReadTargetId] = useState<string | null>(null);
   const socketUrl = useMemo(() => import.meta.env.VITE_SOCKET_URL || "http://localhost:3000", []);
 
   const load = async () => {
@@ -41,7 +44,7 @@ export default function NotificationsPage() {
   return (
     <PageShell title="通知中心" description={`未读 ${unreadCount}`}>
       <SearchFilterBar keyword={keyword} onKeywordChange={setKeyword} placeholder="搜索标题/内容">
-        <button className="btn btn-outline btn-sm" onClick={async () => { await http.patch("/notifications/read-all"); await load(); }}>
+        <button className="btn btn-outline btn-sm" onClick={() => setConfirmReadAllOpen(true)}>
           全部标记已读
         </button>
       </SearchFilterBar>
@@ -59,7 +62,7 @@ export default function NotificationsPage() {
               item.read ? (
                 "-"
               ) : (
-                <button className="btn btn-outline btn-xs" onClick={async () => { await http.patch(`/notifications/${item.id}/read`); await load(); }}>
+                <button className="btn btn-outline btn-xs" onClick={() => setReadTargetId(item.id)}>
                   标记已读
                 </button>
               ),
@@ -67,6 +70,33 @@ export default function NotificationsPage() {
         ]}
         pagination={{ page, pageSize, total, onPageChange: setPage }}
       />
+      <FormDialog
+        title="确认全部标记已读"
+        open={confirmReadAllOpen}
+        onCancel={() => setConfirmReadAllOpen(false)}
+        confirmText="确认"
+        onConfirm={async () => {
+          await http.patch("/notifications/read-all");
+          setConfirmReadAllOpen(false);
+          await load();
+        }}
+      >
+        <p className="text-sm opacity-80">确认将当前用户全部通知设为已读吗？</p>
+      </FormDialog>
+      <FormDialog
+        title="确认标记已读"
+        open={Boolean(readTargetId)}
+        onCancel={() => setReadTargetId(null)}
+        confirmText="确认"
+        onConfirm={async () => {
+          if (!readTargetId) return;
+          await http.patch(`/notifications/${readTargetId}/read`);
+          setReadTargetId(null);
+          await load();
+        }}
+      >
+        <p className="text-sm opacity-80">确认将这条通知标记为已读吗？</p>
+      </FormDialog>
     </PageShell>
   );
 }

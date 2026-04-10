@@ -19,12 +19,12 @@ function CategoryTree({
   nodes,
   onStartEdit,
   onStartAddChild,
-  onDelete,
+  onRequestDelete,
 }: {
   nodes: CategoryNode[];
   onStartEdit: (node: CategoryNode) => void;
   onStartAddChild: (node: CategoryNode) => void;
-  onDelete: (id: string) => Promise<void>;
+  onRequestDelete: (node: CategoryNode) => void;
 }) {
   if (nodes.length === 0) {
     return <div className="text-sm opacity-70">暂无数据</div>;
@@ -76,10 +76,10 @@ function CategoryTree({
                   </button>
                   <button
                     className="btn btn-error btn-outline btn-xs"
-                    onClick={async (e) => {
+                    onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      await onDelete(node.id);
+                      onRequestDelete(node);
                     }}
                   >
                     删除
@@ -92,7 +92,7 @@ function CategoryTree({
                 nodes={node.children}
                 onStartEdit={onStartEdit}
                 onStartAddChild={onStartAddChild}
-                onDelete={onDelete}
+                onRequestDelete={onRequestDelete}
               />
             </div>
           </details>
@@ -111,6 +111,7 @@ export default function CategoriesPage() {
   const [editingForm, setEditingForm] = useState({ name: "", sort: 0, status: 1 });
   const [addingParent, setAddingParent] = useState<CategoryNode | null>(null);
   const [addingForm, setAddingForm] = useState({ name: "", sort: 0 });
+  const [deletingNode, setDeletingNode] = useState<CategoryNode | null>(null);
 
   const load = async () => {
     const res = await http.get("/categories/tree");
@@ -174,10 +175,7 @@ export default function CategoriesPage() {
               setAddingParent(node);
               setAddingForm({ name: "", sort: 0 });
             }}
-            onDelete={async (id) => {
-              await http.delete(`/categories/${id}`);
-              await load();
-            }}
+            onRequestDelete={setDeletingNode}
           />
         </div>
       </div>
@@ -297,6 +295,23 @@ export default function CategoriesPage() {
             onChange={(e) => setAddingForm((p) => ({ ...p, sort: Number(e.target.value) }))}
           />
         </div>
+      </FormDialog>
+
+      <FormDialog
+        title="确认删除节点"
+        open={Boolean(deletingNode)}
+        onCancel={() => setDeletingNode(null)}
+        confirmText="确认删除"
+        onConfirm={async () => {
+          if (!deletingNode) return;
+          await http.delete(`/categories/${deletingNode.id}`);
+          setDeletingNode(null);
+          await load();
+        }}
+      >
+        <p className="text-sm opacity-80">
+          {deletingNode ? `将删除节点「${deletingNode.name}」。如果存在子节点，后端会阻止删除。` : ""}
+        </p>
       </FormDialog>
     </PageShell>
   );

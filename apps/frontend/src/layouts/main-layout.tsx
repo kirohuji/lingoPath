@@ -16,9 +16,12 @@ const topLinks = [
 
 export function MainLayout() {
   return (
-    <div className="flex min-h-screen bg-base-200 text-base-content">
-      <aside className="w-56 border-r border-base-300 bg-base-100 p-4">
-        <h3 className="mb-4 text-lg font-semibold">LingoPath</h3>
+    <div className="flex min-h-screen bg-base-200/60 text-base-content">
+      <aside className="w-64 border-r border-base-300/80 bg-base-100/90 p-4 backdrop-blur">
+        <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/15 to-secondary/15 p-3">
+          <h3 className="text-lg font-semibold">LingoPath Admin</h3>
+          <p className="mt-1 text-xs opacity-70">内容管理控制台</p>
+        </div>
         <nav className="space-y-3">
           <div>
             <div className="px-3 text-xs font-semibold opacity-60">用户权限</div>
@@ -47,8 +50,10 @@ export function MainLayout() {
           </div>
         </nav>
       </aside>
-      <main className="flex-1 p-6">
-        <Outlet />
+      <main className="flex-1 p-6 lg:p-8">
+        <div className="mx-auto w-full max-w-[1400px]">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

@@ -15,6 +15,7 @@ export default function TicketsPage() {
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [statusDialog, setStatusDialog] = useState<{ id: string; status: string; label: string } | null>(null);
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
 
@@ -45,8 +46,8 @@ export default function TicketsPage() {
             header: "操作",
             render: (item) => (
               <div className="flex gap-2">
-                <button className="btn btn-outline btn-xs" onClick={async () => { await http.patch(`/tickets/${item.id}/status`, { status: "processing" }); await load(); }}>处理</button>
-                <button className="btn btn-outline btn-xs" onClick={async () => { await http.patch(`/tickets/${item.id}/status`, { status: "resolved" }); await load(); }}>解决</button>
+                <button className="btn btn-outline btn-xs" onClick={() => setStatusDialog({ id: item.id, status: "processing", label: "处理" })}>处理</button>
+                <button className="btn btn-outline btn-xs" onClick={() => setStatusDialog({ id: item.id, status: "resolved", label: "解决" })}>解决</button>
               </div>
             ),
           },
@@ -71,6 +72,22 @@ export default function TicketsPage() {
           <input className="input input-bordered w-full" placeholder="工单主题" value={subject} onChange={(e) => setSubject(e.target.value)} />
           <textarea className="textarea textarea-bordered w-full" placeholder="工单内容" value={content} onChange={(e) => setContent(e.target.value)} />
         </div>
+      </FormDialog>
+      <FormDialog
+        title="确认状态变更"
+        open={Boolean(statusDialog)}
+        onCancel={() => setStatusDialog(null)}
+        confirmText="确认"
+        onConfirm={async () => {
+          if (!statusDialog) return;
+          await http.patch(`/tickets/${statusDialog.id}/status`, { status: statusDialog.status });
+          setStatusDialog(null);
+          await load();
+        }}
+      >
+        <p className="text-sm opacity-80">
+          {statusDialog ? `确认将该工单状态更新为「${statusDialog.label}」吗？` : ""}
+        </p>
       </FormDialog>
     </PageShell>
   );

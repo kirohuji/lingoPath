@@ -34,11 +34,14 @@ export function DataTable<T>({
   const hasStructuredTable = structuredColumns.length > 0;
 
   return (
-    <div className="card card-border bg-base-100">
-      <div className="card-body p-4">
-        <h3 className="mb-3 text-sm font-semibold">{title}</h3>
+    <div className="card card-border bg-base-100 shadow-sm">
+      <div className="card-body p-4 md:p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold">{title}</h3>
+          {hasStructuredTable ? <span className="badge badge-ghost badge-sm">共 {structuredRows.length} 行</span> : null}
+        </div>
         <div className="overflow-x-auto">
-          <table className="table">
+          <table className="table table-zebra">
             <thead>
               <tr>
                 {hasStructuredTable ? (

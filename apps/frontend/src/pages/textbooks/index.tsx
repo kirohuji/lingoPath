@@ -18,8 +18,13 @@ export default function TextbooksPage() {
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [episodeOpen, setEpisodeOpen] = useState(false);
+  const [episodeTarget, setEpisodeTarget] = useState<Textbook | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [episodeTitle, setEpisodeTitle] = useState("");
+  const [episodeContent, setEpisodeContent] = useState("");
+  const [episodeSort, setEpisodeSort] = useState(0);
 
   const load = async () => {
     const res = await http.get<PageResult<Textbook>>("/textbooks", { params: { page, pageSize } });
@@ -56,7 +61,32 @@ export default function TextbooksPage() {
           {
             key: "episodes",
             header: "分集",
-            render: (item) => (item.episodes || []).map((ep) => ep.title).join(", ") || "无",
+            render: (item) => (
+              <div className="flex flex-wrap gap-1">
+                {(item.episodes || []).length === 0 ? <span className="opacity-70">无</span> : null}
+                {(item.episodes || []).map((ep) => (
+                  <span key={ep.id} className="badge badge-outline badge-sm">{ep.title}</span>
+                ))}
+              </div>
+            ),
+          },
+          {
+            key: "actions",
+            header: "操作",
+            render: (item) => (
+              <button
+                className="btn btn-outline btn-xs"
+                onClick={() => {
+                  setEpisodeTarget(item);
+                  setEpisodeTitle("");
+                  setEpisodeContent("");
+                  setEpisodeSort((item.episodes || []).length);
+                  setEpisodeOpen(true);
+                }}
+              >
+                新增分集
+              </button>
+            ),
           },
         ]}
         pagination={{ page, pageSize, total, onPageChange: setPage }}
@@ -78,6 +108,51 @@ export default function TextbooksPage() {
         <div className="space-y-3">
           <input className="input input-bordered w-full" placeholder="教材标题" value={title} onChange={(e) => setTitle(e.target.value)} />
           <textarea className="textarea textarea-bordered w-full" placeholder="教材描述" value={description} onChange={(e) => setDescription(e.target.value)} />
+        </div>
+      </FormDialog>
+      <FormDialog
+        title={episodeTarget ? `新增分集 - ${episodeTarget.title}` : "新增分集"}
+        open={episodeOpen}
+        onCancel={() => {
+          setEpisodeOpen(false);
+          setEpisodeTarget(null);
+        }}
+        confirmDisabled={!episodeTarget || !episodeTitle.trim()}
+        onConfirm={async () => {
+          if (!episodeTarget) return;
+          await http.post(`/textbooks/${episodeTarget.id}/episodes`, {
+            title: episodeTitle.trim(),
+            content: episodeContent.trim() || undefined,
+            sort: episodeSort,
+          });
+          setEpisodeOpen(false);
+          setEpisodeTarget(null);
+          setEpisodeTitle("");
+          setEpisodeContent("");
+          setEpisodeSort(0);
+          await load();
+        }}
+      >
+        <div className="space-y-3">
+          <input
+            className="input input-bordered w-full"
+            placeholder="分集标题"
+            value={episodeTitle}
+            onChange={(e) => setEpisodeTitle(e.target.value)}
+          />
+          <textarea
+            className="textarea textarea-bordered w-full"
+            placeholder="分集内容（可选）"
+            value={episodeContent}
+            onChange={(e) => setEpisodeContent(e.target.value)}
+          />
+          <input
+            type="number"
+            className="input input-bordered w-full"
+            placeholder="排序"
+            value={episodeSort}
+            onChange={(e) => setEpisodeSort(Number(e.target.value))}
+          />
         </div>
       </FormDialog>
     </PageShell>
