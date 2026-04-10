@@ -26,6 +26,13 @@ export class TextbookService {
     return { items, total, page, pageSize };
   }
 
+  detail(id: string) {
+    return this.prisma.textbook.findUnique({
+      where: { id },
+      include: { episodes: { orderBy: { sort: "asc" } }, tags: { include: { tag: true } } },
+    });
+  }
+
   create(data: { title: string; description?: string; coverUrl?: string }) {
     return this.prisma.textbook.create({ data });
   }

@@ -16,6 +16,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const setToken = useAuthStore((s) => s.setToken);
   const setPermissions = useAuthStore((s) => s.setPermissions);
+  const setUser = useAuthStore((s) => s.setUser);
   const [errorText, setErrorText] = useState("");
 
   const {
@@ -42,6 +43,7 @@ export default function LoginPage() {
         headers: { Authorization: `Bearer ${res.data.accessToken}` },
       });
       setPermissions(me.data.permissions || []);
+      setUser(me.data.user || { id: me.data.id, email: values.email, name: me.data.name });
       navigate("/main/users");
     } catch {
       setErrorText("登录失败，请检查账号密码后重试");

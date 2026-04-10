@@ -10,6 +10,7 @@ const PermissionsPage = lazy(() => import("../pages/permissions"));
 const NotificationsPage = lazy(() => import("../pages/notifications"));
 const MembershipPage = lazy(() => import("../pages/membership"));
 const TextbooksPage = lazy(() => import("../pages/textbooks"));
+const TextbookManagePage = lazy(() => import("../pages/textbook-manage"));
 const CategoriesPage = lazy(() => import("../pages/categories"));
 const TicketsPage = lazy(() => import("../pages/tickets"));
 const ForbiddenPage = lazy(() => import("../pages/forbidden"));
@@ -41,6 +42,7 @@ function RouterContent() {
         { path: "notifications", element: <NotificationsPage /> },
         { path: "memberships", element: <MembershipPage /> },
         { path: "textbooks", element: <TextbooksPage /> },
+        { path: "textbooks/:id", element: <TextbookManagePage /> },
         { path: "categories", element: <CategoriesPage /> },
         { path: "tickets", element: <TicketsPage /> },
       ],

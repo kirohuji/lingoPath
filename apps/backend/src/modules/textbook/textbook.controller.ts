@@ -13,6 +13,11 @@ export class TextbookController {
     return this.service.list(query, keyword);
   }
 
+  @Get(":id")
+  detail(@Param("id") id: string) {
+    return this.service.detail(id);
+  }
+
   @Post()
   create(@Body() body: { title: string; description?: string; coverUrl?: string }) {
     return this.service.create(body);

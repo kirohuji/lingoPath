@@ -1,4 +1,7 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { http } from "@/modules/http";
+import { useAuthStore } from "@/stores/auth-store";
 
 const userSubLinks = [
   ["用户管理", "/main/users"],
@@ -15,14 +18,32 @@ const topLinks = [
 ] as const;
 
 export function MainLayout() {
+  const navigate = useNavigate();
+  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+  const setToken = useAuthStore((s) => s.setToken);
+  const setPermissions = useAuthStore((s) => s.setPermissions);
+
+  useEffect(() => {
+    if (!token || user) return;
+    void http.get("/auth/me").then((res) => {
+      setUser(res.data.user || { id: res.data.id, email: res.data.email, name: res.data.name });
+    }).catch(() => undefined);
+  }, [setUser, token, user]);
+
+  const displayName = user?.name || user?.email || "当前用户";
+  const displayEmail = user?.email || "未获取邮箱";
+  const avatarText = (user?.name || user?.email || "U").slice(0, 1).toUpperCase();
+
   return (
     <div className="flex min-h-screen bg-base-200/60 text-base-content">
-      <aside className="w-64 border-r border-base-300/80 bg-base-100/90 p-4 backdrop-blur">
+      <aside className="flex w-64 flex-col border-r border-base-300/80 bg-base-100/90 p-4 backdrop-blur">
         <div className="mb-4 rounded-xl bg-gradient-to-r from-primary/15 to-secondary/15 p-3">
           <h3 className="text-lg font-semibold">LingoPath Admin</h3>
           <p className="mt-1 text-xs opacity-70">内容管理控制台</p>
         </div>
-        <nav className="space-y-3">
+        <nav className="flex-1 space-y-3">
           <div>
             <div className="px-3 text-xs font-semibold opacity-60">用户权限</div>
             <div className="mt-1 space-y-1">
@@ -49,6 +70,30 @@ export function MainLayout() {
             ))}
           </div>
         </nav>
+        <div className="mt-4 rounded-2xl border border-base-300 bg-base-100/90 p-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="avatar placeholder">
+              <div className="size-10 rounded-full bg-primary/15 text-primary">
+                <span className="text-sm font-semibold">{avatarText}</span>
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold">{displayName}</div>
+              <div className="truncate text-xs opacity-70">{displayEmail}</div>
+            </div>
+          </div>
+          <button
+            className="btn btn-outline btn-sm mt-3 w-full"
+            onClick={() => {
+              setToken(null);
+              setPermissions([]);
+              setUser(null);
+              navigate("/auth/login", { replace: true });
+            }}
+          >
+            退出登录
+          </button>
+        </div>
       </aside>
       <main className="flex-1 p-6 lg:p-8">
         <div className="mx-auto w-full max-w-[1400px]">
