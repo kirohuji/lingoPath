@@ -4,6 +4,7 @@ import { http } from "@/modules/http";
 import { useAuthStore } from "@/stores/auth-store";
 import { PageShell } from "@/components/common/page-shell";
 import { DataTable } from "@/components/data-table";
+import { SearchFilterBar } from "@/components/common/search-filter-bar";
 
 type NotificationItem = { id: string; title: string; body: string; read: boolean };
 type PageResult<T> = { items: T[]; total: number; page: number; pageSize: number };
@@ -14,6 +15,7 @@ export default function NotificationsPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [keyword, setKeyword] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const socketUrl = useMemo(() => import.meta.env.VITE_SOCKET_URL || "http://localhost:3000", []);
 
@@ -38,12 +40,14 @@ export default function NotificationsPage() {
 
   return (
     <PageShell title="通知中心" description={`未读 ${unreadCount}`}>
-      <button className="btn btn-outline btn-sm" onClick={async () => { await http.patch("/notifications/read-all"); await load(); }}>
-        全部标记已读
-      </button>
+      <SearchFilterBar keyword={keyword} onKeywordChange={setKeyword} placeholder="搜索标题/内容">
+        <button className="btn btn-outline btn-sm" onClick={async () => { await http.patch("/notifications/read-all"); await load(); }}>
+          全部标记已读
+        </button>
+      </SearchFilterBar>
       <DataTable
         title="通知列表"
-        rows={items}
+        rows={items.filter((item) => `${item.title} ${item.body}`.toLowerCase().includes(keyword.trim().toLowerCase()))}
         columns={[
           { key: "title", header: "标题", render: (item) => item.title },
           { key: "body", header: "内容", render: (item) => item.body },
