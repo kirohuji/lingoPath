@@ -1,4 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
+import { buttonVariants } from "@/components/ui/button";
 
 const links = [
   ["用户权限", "/main/users"],
@@ -11,16 +12,18 @@ const links = [
 
 export function MainLayout() {
   return (
-    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "sans-serif" }}>
-      <aside style={{ width: 220, background: "#f3f4f6", padding: 16 }}>
-        <h3>LingoPath</h3>
-        {links.map(([label, to]) => (
-          <div key={to} style={{ marginTop: 8 }}>
-            <Link to={to}>{label}</Link>
-          </div>
-        ))}
+    <div className="flex min-h-screen bg-background text-foreground">
+      <aside className="w-56 border-r border-border bg-muted/40 p-4">
+        <h3 className="mb-4 text-lg font-semibold">LingoPath</h3>
+        <nav className="space-y-2">
+          {links.map(([label, to]) => (
+            <Link key={to} to={to} className={buttonVariants({ variant: "ghost", className: "w-full justify-start" })}>
+              {label}
+            </Link>
+          ))}
+        </nav>
       </aside>
-      <main style={{ flex: 1, padding: 16 }}>
+      <main className="flex-1 p-6">
         <Outlet />
       </main>
     </div>

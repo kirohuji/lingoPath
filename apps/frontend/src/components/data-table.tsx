@@ -11,8 +11,8 @@ import {
 export function DataTable({ title, children }: { title: string; children?: ReactNode }) {
   const rows = Array.isArray(children) ? children : children ? [children] : [];
   return (
-    <div className="rounded-lg border bg-white p-4">
-      <h3 className="mb-3 text-sm font-semibold">{title}</h3>
+    <div className="rounded-lg border border-border bg-card p-4">
+      <h3 className="mb-3 text-sm font-semibold text-foreground">{title}</h3>
       <Table>
         <TableHeader>
           <TableRow>
@@ -22,7 +22,7 @@ export function DataTable({ title, children }: { title: string; children?: React
         <TableBody>
           {rows.length === 0 ? (
             <TableRow>
-              <TableCell className="text-slate-400">暂无数据</TableCell>
+              <TableCell className="text-muted-foreground">暂无数据</TableCell>
             </TableRow>
           ) : (
             rows.map((row, idx) => (

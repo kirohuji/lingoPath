@@ -38,12 +38,12 @@ export default function NotificationsPage() {
       </Button>
       <div className="space-y-2">
         {items.map((item) => (
-          <div key={item.id} className="rounded-lg border bg-white p-3">
+          <div key={item.id} className="rounded-lg border border-border bg-card p-3">
             <div className="flex items-center justify-between">
               <strong>{item.title}</strong>
-              <span>{item.read ? "已读" : "未读"}</span>
+              <span className="text-xs text-muted-foreground">{item.read ? "已读" : "未读"}</span>
             </div>
-            <div className="text-sm text-slate-600">{item.body}</div>
+            <div className="text-sm text-muted-foreground">{item.body}</div>
           </div>
         ))}
       </div>

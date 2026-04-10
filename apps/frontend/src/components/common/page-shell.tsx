@@ -10,10 +10,10 @@ export function PageShell({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-4">
-      <header>
-        <h2 className="text-xl font-semibold">{title}</h2>
-        {description ? <p className="text-sm text-slate-500">{description}</p> : null}
+    <section className="space-y-6">
+      <header className="space-y-1">
+        <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
       </header>
       {children}
     </section>

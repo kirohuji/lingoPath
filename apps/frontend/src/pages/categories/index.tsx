@@ -25,7 +25,11 @@ export default function CategoriesPage() {
     <PageShell title="分类库" description="三级分类树管理">
       <FilterBar>
         <Input placeholder="分类名" value={name} onChange={(e) => setName(e.target.value)} />
-        <select value={level} onChange={(e) => setLevel(Number(e.target.value))}>
+        <select
+          className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
+          value={level}
+          onChange={(e) => setLevel(Number(e.target.value))}
+        >
           <option value={1}>一级</option>
           <option value={2}>二级</option>
           <option value={3}>三级</option>
@@ -43,7 +47,7 @@ export default function CategoriesPage() {
       </FilterBar>
       <DataTable title="分类列表">
         {items.map((c) => (
-          <div key={c.id} className="flex items-center gap-2">
+          <div key={c.id} className="flex items-center gap-2 text-sm">
             <span>
               L{c.level} - {c.name}
             </span>

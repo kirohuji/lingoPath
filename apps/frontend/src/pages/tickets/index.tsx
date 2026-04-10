@@ -40,7 +40,7 @@ export default function TicketsPage() {
       </FilterBar>
       <DataTable title="工单列表">
         {items.map((item) => (
-          <div key={item.id} className="flex items-center gap-2">
+          <div key={item.id} className="flex items-center gap-2 text-sm">
             <span>{item.subject} / {item.status}</span>
             <Button size="sm" variant="outline" onClick={async () => { await http.patch(`/tickets/${item.id}/status`, { status: "processing" }); await load(); }}>处理</Button>
             <Button size="sm" variant="outline" onClick={async () => { await http.patch(`/tickets/${item.id}/status`, { status: "resolved" }); await load(); }}>解决</Button>

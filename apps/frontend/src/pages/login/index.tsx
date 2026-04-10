@@ -32,8 +32,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="mx-auto mt-20 max-w-sm rounded-xl border bg-white p-6">
-      <h2 className="mb-4 text-xl font-semibold">登录</h2>
+    <div className="mx-auto mt-20 max-w-sm rounded-xl border border-border bg-card p-6 shadow-sm">
+      <h2 className="mb-1 text-xl font-semibold tracking-tight">登录</h2>
+      <p className="mb-4 text-sm text-muted-foreground">使用管理员账号进入后台</p>
       <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
         <Input placeholder="邮箱" {...register("email")} />
         <Input placeholder="密码" type="password" {...register("password")} />

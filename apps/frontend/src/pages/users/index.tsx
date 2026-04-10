@@ -5,7 +5,6 @@ import { DataTable } from "@/components/data-table";
 import { FilterBar } from "@/components/common/filter-bar";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type UserItem = { id: string; email: string; name?: string; roleAssignments?: { role: { code: string } }[] };
 type RoleItem = { id: string; name: string; code: string; permissions?: { permission: { id: string; code: string } }[] };
@@ -39,11 +38,19 @@ export default function UsersPage() {
     <PageShell title="用户与权限" description="用户、角色、权限管理">
       <HasPermission required="role.manage">
         <FilterBar>
-          <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)}>
+          <select
+            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
+            value={selectedUserId}
+            onChange={(e) => setSelectedUserId(e.target.value)}
+          >
             <option value="">选择用户</option>
             {users.map((u) => <option key={u.id} value={u.id}>{u.email}</option>)}
           </select>
-          <select value={selectedRoleId} onChange={(e) => setSelectedRoleId(e.target.value)}>
+          <select
+            className="h-8 rounded-lg border border-input bg-background px-2.5 text-sm"
+            value={selectedRoleId}
+            onChange={(e) => setSelectedRoleId(e.target.value)}
+          >
             <option value="">选择角色</option>
             {roles.map((r) => <option key={r.id} value={r.id}>{r.name}({r.code})</option>)}
           </select>
@@ -52,7 +59,9 @@ export default function UsersPage() {
       </HasPermission>
       <DataTable title="用户列表">
         {users.map((u) => (
-          <div key={u.id}>{u.email} / {(u.roleAssignments || []).map((r) => r.role.code).join(",") || "无角色"}</div>
+          <div key={u.id} className="text-sm">
+            {u.email} / {(u.roleAssignments || []).map((r) => r.role.code).join(",") || "无角色"}
+          </div>
         ))}
       </DataTable>
       <DataTable title="角色列表">

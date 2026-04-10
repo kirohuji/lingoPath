@@ -26,7 +26,10 @@ export default function TextbooksPage() {
 
   return (
     <PageShell title="教材库" description="教材与分集管理">
-      <div {...getRootProps()} className="rounded-lg border border-dashed bg-white p-4">
+      <div
+        {...getRootProps()}
+        className="rounded-lg border border-dashed border-border bg-card p-4 text-sm text-muted-foreground"
+      >
         <input {...getInputProps()} />
         拖拽上传教材文件
       </div>
@@ -45,10 +48,12 @@ export default function TextbooksPage() {
           新增教材
         </Button>
       </FilterBar>
-      <ReactMarkdown>{description || "# 教材描述预览"}</ReactMarkdown>
+      <div className="rounded-lg border border-border bg-card p-4">
+        <ReactMarkdown>{description || "# 教材描述预览"}</ReactMarkdown>
+      </div>
       <DataTable title="教材列表">
         {items.map((item) => (
-          <div key={item.id}>
+          <div key={item.id} className="text-sm">
             {item.title} / 分集 {(item.episodes || []).map((ep) => ep.title).join(", ") || "无"}
           </div>
         ))}
