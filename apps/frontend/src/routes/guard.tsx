@@ -19,3 +19,15 @@ export function PermissionGuard({
   if (!permissions.includes(required)) return <Navigate to="/403" replace />;
   return <>{children}</>;
 }
+
+export function HasPermission({
+  required,
+  children,
+}: {
+  required: string;
+  children: ReactNode;
+}) {
+  const permissions = useAuthStore((s) => s.permissions);
+  if (!permissions.includes(required)) return null;
+  return <>{children}</>;
+}

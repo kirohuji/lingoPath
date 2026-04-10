@@ -22,6 +22,20 @@ async function main() {
     create: { name: "用户", code: "user" },
   });
 
+  const permissions = [
+    { name: "查看用户", code: "user.read", type: "api" },
+    { name: "管理角色", code: "role.manage", type: "api" },
+    { name: "管理权限", code: "permission.manage", type: "api" },
+    { name: "查看工单", code: "ticket.read", type: "api" },
+  ];
+  for (const item of permissions) {
+    await prisma.permission.upsert({
+      where: { code: item.code },
+      update: {},
+      create: item,
+    });
+  }
+
   const admin = await prisma.user.upsert({
     where: { email: "admin@lingopath.local" },
     update: {},
@@ -37,6 +51,23 @@ async function main() {
     update: {},
     create: { userId: admin.id, roleId: adminRole.id },
   });
+
+  const allPermissions = await prisma.permission.findMany({ select: { id: true } });
+  for (const perm of allPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: adminRole.id,
+          permissionId: perm.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: adminRole.id,
+        permissionId: perm.id,
+      },
+    });
+  }
 }
 
 main()

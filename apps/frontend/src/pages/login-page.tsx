@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { http } from "../modules/http";
 import { useAuthStore } from "../stores/auth-store";
@@ -15,6 +15,7 @@ type FormValues = z.infer<typeof schema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const setToken = useAuthStore((s) => s.setToken);
+  const setPermissions = useAuthStore((s) => s.setPermissions);
   const { register, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
@@ -22,6 +23,10 @@ export default function LoginPage() {
   const onSubmit = async (values: FormValues) => {
     const res = await http.post("/auth/login", values);
     setToken(res.data.accessToken);
+    const me = await http.get("/auth/me", {
+      headers: { Authorization: `Bearer ${res.data.accessToken}` },
+    });
+    setPermissions(me.data.permissions || []);
     navigate("/main/users");
   };
 

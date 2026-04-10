@@ -1,4 +1,10 @@
 import { ReactNode } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function FormDialog({
   title,
@@ -9,11 +15,14 @@ export function FormDialog({
   open: boolean;
   children?: ReactNode;
 }) {
-  if (!open) return null;
   return (
-    <div style={{ border: "1px solid #ddd", padding: 16, marginTop: 12 }}>
-      <h4>{title}</h4>
-      {children}
-    </div>
+    <Dialog open={open}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
   );
 }

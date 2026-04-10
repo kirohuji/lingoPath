@@ -15,6 +15,8 @@ import { RedisModule } from "./infrastructure/cache/redis.module";
 import { QueueModule } from "./infrastructure/queue/queue.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { SystemConfigModule } from "./modules/system-config/system-config.module";
+import { UserModule } from "./modules/user/user.module";
+import { RbacModule } from "./modules/rbac/rbac.module";
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { SystemConfigModule } from "./modules/system-config/system-config.module
     TicketModule,
     AuditModule,
     SystemConfigModule,
+    UserModule,
+    RbacModule,
   ],
 })
 export class AppModule {}

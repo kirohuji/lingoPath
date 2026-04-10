@@ -21,4 +21,23 @@ export class CategoryService {
       },
     });
   }
+
+  update(id: string, data: { name?: string; sort?: number; status?: number }) {
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        name: data.name,
+        sort: data.sort,
+        status: data.status,
+      },
+    });
+  }
+
+  async remove(id: string) {
+    const childCount = await this.prisma.category.count({ where: { parentId: id } });
+    if (childCount > 0) {
+      throw new BadRequestException("Cannot delete category with children");
+    }
+    return this.prisma.category.delete({ where: { id } });
+  }
 }

@@ -26,4 +26,25 @@ export class TicketService {
     });
     return ticket;
   }
+
+  async reply(ticketId: string, content: string) {
+    const reply = await this.prisma.ticketReply.create({
+      data: { ticketId, content },
+    });
+    await this.prisma.ticketLog.create({
+      data: { ticketId, action: "replied", remark: content.slice(0, 60) },
+    });
+    return reply;
+  }
+
+  async updateStatus(ticketId: string, status: string) {
+    const ticket = await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: { status },
+    });
+    await this.prisma.ticketLog.create({
+      data: { ticketId, action: "status_changed", remark: status },
+    });
+    return ticket;
+  }
 }

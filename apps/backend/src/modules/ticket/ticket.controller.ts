@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { CurrentUser } from "@/shared/decorators/current-user.decorator";
 import { TicketService } from "./ticket.service";
@@ -24,5 +24,15 @@ export class TicketController {
       content: body.content,
       priority: body.priority,
     });
+  }
+
+  @Post(":id/replies")
+  reply(@Param("id") id: string, @Body() body: { content: string }) {
+    return this.service.reply(id, body.content);
+  }
+
+  @Patch(":id/status")
+  updateStatus(@Param("id") id: string, @Body() body: { status: string }) {
+    return this.service.updateStatus(id, body.status);
   }
 }
