@@ -28,7 +28,8 @@ export function MainLayout() {
   useEffect(() => {
     if (!token || user) return;
     void http.get("/auth/me").then((res) => {
-      setUser(res.data.user || { id: res.data.id, email: res.data.email, name: res.data.name });
+      const me = res.data.user || { id: res.data.id, email: res.data.email, name: res.data.name, avatarUrl: res.data.avatarUrl };
+      setUser(me);
     }).catch(() => undefined);
   }, [setUser, token, user]);
 
@@ -72,11 +73,19 @@ export function MainLayout() {
         </nav>
         <div className="mt-4 rounded-2xl border border-base-300 bg-base-100/90 p-3 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="avatar placeholder">
-              <div className="size-10 rounded-full bg-primary/15 text-primary">
-                <span className="text-sm font-semibold">{avatarText}</span>
+            {user?.avatarUrl ? (
+              <div className="avatar">
+                <div className="size-10 rounded-full">
+                  <img src={user.avatarUrl} alt={displayName} />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="avatar placeholder">
+                <div className="size-10 rounded-full bg-primary/15 text-primary">
+                  <span className="text-sm font-semibold">{avatarText}</span>
+                </div>
+              </div>
+            )}
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold">{displayName}</div>
               <div className="truncate text-xs opacity-70">{displayEmail}</div>

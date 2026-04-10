@@ -43,7 +43,7 @@ export default function LoginPage() {
         headers: { Authorization: `Bearer ${res.data.accessToken}` },
       });
       setPermissions(me.data.permissions || []);
-      setUser(me.data.user || { id: me.data.id, email: values.email, name: me.data.name });
+      setUser(me.data.user || { id: me.data.id, email: values.email, name: me.data.name, avatarUrl: me.data.avatarUrl });
       navigate("/main/users");
     } catch {
       setErrorText("登录失败，请检查账号密码后重试");
